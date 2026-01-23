@@ -20,11 +20,8 @@ Give feedback, get inspired, and build on top of the MCP: [Discord](https://disc
 
 [Support this project](https://github.com/sponsors/ahujasid)
 
-## Release notes (1.4.0)
+## Current version(1.5.5)
 - Added Hunyuan3D support
-
-
-### Previously added features:
 - View screenshots for Blender viewport to better understand the scene
 - Search and download Sketchfab models
 - Support for Poly Haven assets through their API
@@ -248,6 +245,37 @@ The system uses a simple JSON-based protocol over TCP sockets:
 - The `execute_blender_code` tool allows running arbitrary Python code in Blender, which can be powerful but potentially dangerous. Use with caution in production environments. ALWAYS save your work before using it.
 - Poly Haven requires downloading models, textures, and HDRI images. If you do not want to use it, please turn it off in the checkbox in Blender. 
 - Complex operations might need to be broken down into smaller steps
+
+
+#### Telemetry Control
+
+BlenderMCP collects anonymous usage data to help improve the tool. You can control telemetry in two ways:
+
+1. **In Blender**: Go to Edit > Preferences > Add-ons > Blender MCP and uncheck the telemetry consent checkbox
+   - With consent (checked): Collects anonymized prompts, code snippets, and screenshots
+   - Without consent (unchecked): Only collects minimal anonymous usage data (tool names, success/failure, duration)
+
+2. **Environment Variable**: Completely disable all telemetry by running:
+```bash
+DISABLE_TELEMETRY=true uvx blender-mcp
+```
+
+Or add it to your MCP config:
+```json
+{
+    "mcpServers": {
+        "blender": {
+            "command": "uvx",
+            "args": ["blender-mcp"],
+            "env": {
+                "DISABLE_TELEMETRY": "true"
+            }
+        }
+    }
+}
+```
+
+All telemetry data is fully anonymized and used solely to improve BlenderMCP.
 
 
 ## Contributing

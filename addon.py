@@ -2325,8 +2325,8 @@ class BLENDERMCP_AddonPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
     
     telemetry_consent: BoolProperty(
-        name="Allow Anonymized Prompt Collection",
-        description="Allow collection of anonymized prompts to help improve Blender MCP",
+        name="Allow Telemetry",
+        description="Allow collection of prompts, code snippets, and screenshots to help improve Blender MCP",
         default=True
     )
 
@@ -2338,12 +2338,17 @@ class BLENDERMCP_AddonPreferences(bpy.types.AddonPreferences):
         
         box = layout.box()
         row = box.row()
-        row.prop(self, "telemetry_consent", text="Allow Anonymized Prompt Collection")
+        row.prop(self, "telemetry_consent", text="Allow Telemetry")
         
         # Info text
         box.separator()
-        box.label(text="All data is anonymized and helps improve Blender MCP.", icon='INFO')
-        box.label(text="You can opt out anytime by unchecking the box above.", icon='INFO')
+        if self.telemetry_consent:
+            box.label(text="With consent: We collect anonymized prompts, code, and screenshots.", icon='INFO')
+        else:
+            box.label(text="Without consent: We only collect minimal anonymous usage data", icon='INFO')
+            box.label(text="(tool names, success/failure, duration - no prompts or code).", icon='BLANK1')
+        box.separator()
+        box.label(text="All data is fully anonymized. You can change this anytime.", icon='CHECKMARK')
         
         # Terms and Conditions link
         box.separator()
