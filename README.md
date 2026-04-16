@@ -127,4 +127,4 @@ The MCP server will start and then log `Failed to connect to Blender: [WinError 
 
 ## License
 
-MIT — see `LICENSE`. Original copyright © Siddharth Ahuja; fork modifications © Lucas G. F. Salvador. Both are permissively licensed; keep this `LICENSE` file in any redistribution.
+MIT — see `LICENSE`. Original copyright © Siddharth Ahuja; fork modifications © lucasgfsvd. Both are permissively licensed; keep this `LICENSE` file in any redistribution.

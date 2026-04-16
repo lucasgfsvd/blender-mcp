@@ -5,7 +5,7 @@ description = "Blender integration through the Model Context Protocol (telemetry
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
-    {name = "Lucas G. F. Salvador", email = "lucas.gf.salvador@gmail.com"}
+    {name = "lucasgfsvd"}
 ]
 license = {text = "MIT"}
 classifiers = [
