@@ -1,0 +1,212 @@
+{
+  "version": "1.0",
+  "description": "Engineering material library with thermal, optical, structural, and Blender shader properties. Values are indicative; verify against a traceable source before relying on them for flight analysis.",
+  "units": {
+    "thermal.k": "W/(m·K)",
+    "thermal.cp": "J/(kg·K)",
+    "thermal.rho": "kg/m^3",
+    "thermal.cte": "1/K",
+    "optical.epsilon_IR": "dimensionless (0–1)",
+    "optical.alpha_solar": "dimensionless (0–1)",
+    "structural.E": "Pa",
+    "structural.yield": "Pa",
+    "structural.ultimate": "Pa",
+    "structural.nu": "dimensionless"
+  },
+  "materials": {
+    "al_6061": {
+      "name": "Aluminum 6061-T6",
+      "category": "metal",
+      "thermal": {"k": 167, "cp": 896, "rho": 2700, "cte": 23.6e-6},
+      "optical": {"epsilon_IR": 0.04, "alpha_solar": 0.30, "notes": "polished; as-machined alpha_solar ~0.30"},
+      "structural": {"E": 68.9e9, "yield": 276e6, "ultimate": 310e6, "nu": 0.33},
+      "blender": {"base_color": [0.913, 0.921, 0.925, 1.0], "metallic": 1.0, "roughness": 0.35},
+      "notes": "Workhorse structural aluminum. T6 temper properties.",
+      "sources": ["MIL-HDBK-5J", "MatWeb"]
+    },
+    "al_7075": {
+      "name": "Aluminum 7075-T6",
+      "category": "metal",
+      "thermal": {"k": 130, "cp": 960, "rho": 2810, "cte": 23.4e-6},
+      "optical": {"epsilon_IR": 0.04, "alpha_solar": 0.30},
+      "structural": {"E": 71.7e9, "yield": 503e6, "ultimate": 572e6, "nu": 0.33},
+      "blender": {"base_color": [0.913, 0.921, 0.925, 1.0], "metallic": 1.0, "roughness": 0.35},
+      "notes": "High-strength aluminum; used for structures where Al 6061 is marginal.",
+      "sources": ["MIL-HDBK-5J"]
+    },
+    "ti_6al_4v": {
+      "name": "Titanium Ti-6Al-4V (Grade 5)",
+      "category": "metal",
+      "thermal": {"k": 6.7, "cp": 526, "rho": 4430, "cte": 8.6e-6},
+      "optical": {"epsilon_IR": 0.15, "alpha_solar": 0.45, "notes": "values for lightly oxidized surface"},
+      "structural": {"E": 113.8e9, "yield": 880e6, "ultimate": 950e6, "nu": 0.342},
+      "blender": {"base_color": [0.542, 0.497, 0.449, 1.0], "metallic": 1.0, "roughness": 0.40},
+      "notes": "Aerospace workhorse titanium. Low CTE, high strength-to-weight.",
+      "sources": ["MIL-HDBK-5J"]
+    },
+    "ss_316l": {
+      "name": "Stainless Steel 316L",
+      "category": "metal",
+      "thermal": {"k": 16.2, "cp": 500, "rho": 8000, "cte": 17.3e-6},
+      "optical": {"epsilon_IR": 0.28, "alpha_solar": 0.43, "notes": "lightly oxidized; polished values much lower"},
+      "structural": {"E": 193e9, "yield": 205e6, "ultimate": 515e6, "nu": 0.25},
+      "blender": {"base_color": [0.562, 0.565, 0.578, 1.0], "metallic": 1.0, "roughness": 0.30},
+      "notes": "Austenitic stainless; common for fluid lines, pressure vessels.",
+      "sources": ["ASM Handbook Vol 1"]
+    },
+    "invar_36": {
+      "name": "Invar 36 (FeNi36)",
+      "category": "metal",
+      "thermal": {"k": 13.5, "cp": 515, "rho": 8055, "cte": 1.6e-6},
+      "optical": {"epsilon_IR": 0.2, "alpha_solar": 0.5},
+      "structural": {"E": 141e9, "yield": 276e6, "ultimate": 483e6, "nu": 0.29},
+      "blender": {"base_color": [0.56, 0.56, 0.56, 1.0], "metallic": 1.0, "roughness": 0.35},
+      "notes": "Ultra-low CTE alloy for dimensionally stable structures (optics benches, waveguides).",
+      "sources": ["ASM Handbook Vol 2"]
+    },
+    "cu_ofhc": {
+      "name": "Copper OFHC (C10100)",
+      "category": "metal",
+      "thermal": {"k": 391, "cp": 385, "rho": 8940, "cte": 17.0e-6},
+      "optical": {"epsilon_IR": 0.03, "alpha_solar": 0.30, "notes": "polished; oxidizes rapidly — eps_IR rises to ~0.6 once tarnished"},
+      "structural": {"E": 115e9, "yield": 69e6, "ultimate": 220e6, "nu": 0.34},
+      "blender": {"base_color": [0.955, 0.638, 0.538, 1.0], "metallic": 1.0, "roughness": 0.25},
+      "notes": "High thermal conductivity for heat straps, cold plates.",
+      "sources": ["ASM Handbook Vol 2"]
+    },
+    "brass_360": {
+      "name": "Brass C360 (free-machining)",
+      "category": "metal",
+      "thermal": {"k": 115, "cp": 380, "rho": 8500, "cte": 20.5e-6},
+      "optical": {"epsilon_IR": 0.04, "alpha_solar": 0.38},
+      "structural": {"E": 97e9, "yield": 310e6, "ultimate": 380e6, "nu": 0.31},
+      "blender": {"base_color": [0.910, 0.847, 0.450, 1.0], "metallic": 1.0, "roughness": 0.35}
+    },
+    "gold": {
+      "name": "Gold (vapor-deposited)",
+      "category": "coating",
+      "thermal": {"k": 317, "cp": 129, "rho": 19320, "cte": 14.2e-6},
+      "optical": {"epsilon_IR": 0.03, "alpha_solar": 0.19, "notes": "vapor-deposited on aluminum; very low emittance for low-T radiators"},
+      "blender": {"base_color": [1.000, 0.766, 0.336, 1.0], "metallic": 1.0, "roughness": 0.20},
+      "notes": "Used as low-emittance coating on MLI outer layer and inside enclosures.",
+      "sources": ["NASA TM-84238"]
+    },
+    "cfrp_quasi_iso": {
+      "name": "CFRP (T300/5208 quasi-isotropic laminate)",
+      "category": "composite",
+      "thermal": {"k": 5.0, "cp": 900, "rho": 1550, "cte": 2.0e-6, "notes": "in-plane; through-thickness k ~0.7"},
+      "optical": {"epsilon_IR": 0.88, "alpha_solar": 0.92, "notes": "unpainted prepreg weave"},
+      "structural": {"E": 50e9, "yield": 450e6, "ultimate": 600e6, "nu": 0.33, "notes": "quasi-iso layup; UD laminates are strongly anisotropic"},
+      "blender": {"base_color": [0.05, 0.05, 0.05, 1.0], "metallic": 0.0, "roughness": 0.50},
+      "notes": "Highly anisotropic — verify lay-up before trusting single k or E value."
+    },
+    "gfrp": {
+      "name": "GFRP (E-glass/epoxy, quasi-iso)",
+      "category": "composite",
+      "thermal": {"k": 0.3, "cp": 1000, "rho": 1800, "cte": 9e-6},
+      "optical": {"epsilon_IR": 0.90, "alpha_solar": 0.70},
+      "structural": {"E": 17e9, "yield": 200e6, "ultimate": 350e6, "nu": 0.28},
+      "blender": {"base_color": [0.850, 0.880, 0.820, 1.0], "metallic": 0.0, "roughness": 0.55}
+    },
+    "g10": {
+      "name": "G10 / FR4 (epoxy-glass laminate)",
+      "category": "composite",
+      "thermal": {"k": 0.3, "cp": 1100, "rho": 1850, "cte": 11e-6, "notes": "cryo-relevant; k drops to ~0.1 at 77 K"},
+      "optical": {"epsilon_IR": 0.85, "alpha_solar": 0.60},
+      "structural": {"E": 18e9, "yield": 260e6, "ultimate": 310e6, "nu": 0.18},
+      "blender": {"base_color": [0.82, 0.76, 0.55, 1.0], "metallic": 0.0, "roughness": 0.60},
+      "notes": "Low-conductivity cryogenic structural material (straps, supports).",
+      "sources": ["NIST cryogenic property database"]
+    },
+    "fr4": {
+      "name": "FR4 (PCB substrate)",
+      "category": "composite",
+      "thermal": {"k": 0.25, "cp": 1150, "rho": 1850, "cte": 16e-6, "notes": "in-plane; out-of-plane k ~0.4 with copper planes"},
+      "optical": {"epsilon_IR": 0.95, "alpha_solar": 0.75},
+      "structural": {"E": 22e9, "yield": 415e6, "ultimate": 450e6, "nu": 0.16},
+      "blender": {"base_color": [0.25, 0.55, 0.25, 1.0], "metallic": 0.0, "roughness": 0.45},
+      "notes": "PCB green; k values assume pure FR4 without copper planes."
+    },
+    "kapton_hn": {
+      "name": "Kapton HN (polyimide film, 25 μm)",
+      "category": "polymer",
+      "thermal": {"k": 0.12, "cp": 1090, "rho": 1420, "cte": 20e-6},
+      "optical": {"epsilon_IR": 0.66, "alpha_solar": 0.38, "notes": "25 μm uncoated film; values scale with thickness and coating"},
+      "structural": {"E": 2.5e9, "yield": 69e6, "ultimate": 231e6, "nu": 0.34},
+      "blender": {"base_color": [0.55, 0.35, 0.10, 1.0], "metallic": 0.0, "roughness": 0.40},
+      "notes": "MLI, harness insulation, flexible heaters. Amber color.",
+      "sources": ["DuPont Kapton HN datasheet"]
+    },
+    "peek": {
+      "name": "PEEK (polyether ether ketone)",
+      "category": "polymer",
+      "thermal": {"k": 0.25, "cp": 1340, "rho": 1320, "cte": 47e-6},
+      "optical": {"epsilon_IR": 0.90, "alpha_solar": 0.90},
+      "structural": {"E": 3.6e9, "yield": 100e6, "ultimate": 115e6, "nu": 0.38},
+      "blender": {"base_color": [0.75, 0.60, 0.40, 1.0], "metallic": 0.0, "roughness": 0.50}
+    },
+    "ptfe": {
+      "name": "PTFE (Teflon)",
+      "category": "polymer",
+      "thermal": {"k": 0.25, "cp": 1000, "rho": 2200, "cte": 135e-6},
+      "optical": {"epsilon_IR": 0.92, "alpha_solar": 0.12, "notes": "white diffuse; solar absorptance very low"},
+      "structural": {"E": 0.5e9, "yield": 23e6, "ultimate": 30e6, "nu": 0.46},
+      "blender": {"base_color": [0.95, 0.95, 0.95, 1.0], "metallic": 0.0, "roughness": 0.55}
+    },
+    "z93_white_paint": {
+      "name": "Z93 White Paint (potassium silicate)",
+      "category": "coating",
+      "optical": {"epsilon_IR": 0.92, "alpha_solar": 0.16, "notes": "BOL; degrades to alpha_solar ≥ 0.25 after typical LEO year"},
+      "blender": {"base_color": [0.95, 0.95, 0.95, 1.0], "metallic": 0.0, "roughness": 0.90},
+      "notes": "Standard cold-biased thermal control coating for external surfaces.",
+      "sources": ["NASA TM-84238"]
+    },
+    "z306_black_paint": {
+      "name": "Z306 / Chemglaze Black Paint",
+      "category": "coating",
+      "optical": {"epsilon_IR": 0.87, "alpha_solar": 0.94},
+      "blender": {"base_color": [0.03, 0.03, 0.03, 1.0], "metallic": 0.0, "roughness": 0.95},
+      "notes": "Stray-light suppression inside optical cavities; also general hot-biased surface.",
+      "sources": ["NASA TM-84238"]
+    },
+    "silver_teflon": {
+      "name": "Silvered Teflon (Ag/FEP)",
+      "category": "coating",
+      "optical": {"epsilon_IR": 0.81, "alpha_solar": 0.08, "notes": "BOL; Ag layer on back of FEP film"},
+      "blender": {"base_color": [0.90, 0.90, 0.92, 1.0], "metallic": 1.0, "roughness": 0.15},
+      "notes": "Second-surface mirror for radiators — very low alpha, high eps_IR.",
+      "sources": ["NASA TM-84238"]
+    },
+    "aluminized_kapton_vda": {
+      "name": "Aluminized Kapton (VDA side)",
+      "category": "coating",
+      "optical": {"epsilon_IR": 0.05, "alpha_solar": 0.14, "notes": "VDA (vapor-deposited aluminum) side of aluminized polyimide; opposite (Kapton) side has high eps_IR"},
+      "blender": {"base_color": [0.85, 0.85, 0.87, 1.0], "metallic": 1.0, "roughness": 0.20},
+      "notes": "Typical MLI outer-layer inner-facing side."
+    },
+    "black_kapton": {
+      "name": "Black Kapton (carbon-loaded polyimide)",
+      "category": "coating",
+      "optical": {"epsilon_IR": 0.85, "alpha_solar": 0.92},
+      "blender": {"base_color": [0.05, 0.04, 0.03, 1.0], "metallic": 0.0, "roughness": 0.60},
+      "notes": "Conductive black film for ESD-sensitive regions."
+    },
+    "mli_effective": {
+      "name": "MLI (effective — 20-layer aluminized mylar)",
+      "category": "insulation",
+      "thermal": {"k": 0.0001, "notes": "effective-through-thickness for a well-vented 20-layer blanket at ~300 K; scales non-linearly with layer count and ambient"},
+      "optical": {"epsilon_IR": 0.03, "alpha_solar": 0.14, "notes": "outer-layer Al/Kapton VDA side; varies per outer layer selection"},
+      "blender": {"base_color": [0.85, 0.85, 0.87, 1.0], "metallic": 1.0, "roughness": 0.25},
+      "notes": "MLI performance is system-level (layup, venting, edges). Use for first-cut only.",
+      "sources": ["NASA SP-8105"]
+    },
+    "aerogel": {
+      "name": "Silica Aerogel (bulk, 100 kg/m³)",
+      "category": "insulation",
+      "thermal": {"k": 0.014, "cp": 1050, "rho": 100},
+      "optical": {"epsilon_IR": 0.85, "alpha_solar": 0.90, "notes": "translucent; actual values depend on thickness"},
+      "structural": {"E": 0.01e9, "yield": 0.1e6, "notes": "very fragile; not a structural material"},
+      "blender": {"base_color": [0.90, 0.94, 0.98, 0.6], "metallic": 0.0, "roughness": 0.30}
+    }
+  }
+}

@@ -90,94 +90,185 @@ Restart the client. The server will launch on demand, connect to Blender on `loc
 
 ---
 
-## Built-in tools
+## Tools
 
+This fork ships the upstream tool surface **plus ~40 engineering-specific tools**
+implemented on top of `execute_blender_code` (no `addon.py` changes — the
+upstream addon keeps working). All new tools are Python-dispatched: each crafts
+a `bpy` snippet, dispatches it over the socket, and parses a JSON result.
+
+### Scene inspection & generic scripting
 | Tool | Purpose |
 |---|---|
 | `get_scene_info` | Inspect current scene (objects, camera, lights) |
 | `get_object_info` | Inspect a single object (transform, mesh, materials) |
 | `get_viewport_screenshot` | Capture the 3D viewport as an image |
-| `execute_blender_code` | Run arbitrary `bpy` Python inside Blender — the workhorse for modeling/editing |
+| `execute_blender_code` | Run arbitrary `bpy` Python — the escape hatch for anything not covered by a named tool |
+
+### Parametric engineering primitives
+| Tool | Purpose |
+|---|---|
+| **Mechanical** ||
+| `slotted_plate` | Rectangular plate with linear array of oblong slots |
+| `perforated_plate` | Plate with square or staggered circular-hole grid |
+| `l_bracket` / `t_bracket` / `u_channel` | Standard bracket / channel profiles |
+| `rounded_box` | Box with beveled edges (enclosure shape) |
+| `bolt_hole_pattern` | PCD or grid bolt-hole drilling on an existing object |
+| `swept_tube` | Polyline-path tube with optional wall thickness |
+| `truss_node` | Spherical hub with radiating cylindrical struts |
+| **Aerospace / space** ||
+| `cylindrical_tank` | Barrel + ellipsoidal/hemispherical/flat domes, optional hollow shell |
+| `spherical_tank` | Solid or shelled pressure sphere |
+| `cone_frustum` | Cone or frustum with optional wall thickness |
+| `torus` | Parameterized torus |
+| `satellite_bus` | 6-panel rectangular bus, optional deployed solar wings |
+| `cubesat` | Hollow CubeSat frame sized in U |
+| `rover_chassis` | 4-wheel rover with parametric wheelbase/track/clearance |
+| `lander_leg` | Splayed strut + footpad |
+| `planetary_terrain_patch` | Perlin-noise heightfield for rover/lander backdrops |
+
+### Mesh simplification & defeaturing
+| Tool | Purpose |
+|---|---|
+| `decimate` | Collapse decimate by ratio |
+| `decimate_planar` | Dissolve coplanar faces by angle |
+| `keep_outer_shell` | Delete interior faces (radiation-prep) |
+| `delete_small_objects` | Drop bolts/fasteners below bbox-diagonal threshold; dry-run by default |
+| `separate_loose_parts` | Split disconnected components into one object each |
+| `fill_holes` | Close small boundary loops |
+| `merge_duplicates` | Merge coincident vertices (remove doubles) |
+| `triangulate` | Convert quads/n-gons to triangles |
+| `remesh_voxel` / `remesh_quad` | Uniform watertight remesh (FE/CFD prep) |
+
+### Engineering material library (22 materials)
+Curated library with thermal (`k`, `cp`, `ρ`, CTE), optical (`ε_IR`, `α_solar`),
+structural (`E`, yield, ν), and Blender shader values. Values are written to
+Blender custom properties so export scripts can read them straight from the
+`.blend` file.
+
+| Tool | Purpose |
+|---|---|
+| `list_materials` | List available materials; filter by category (metal, composite, polymer, coating, insulation) |
+| `get_material_properties` | Full property record for one material, including sources |
+| `apply_material` | Create / reuse a Blender material from the library and assign it to an object |
+
+Shipped entries include Al 6061/7075, Ti-6Al-4V, SS 316L, Invar 36, OFHC Cu,
+CFRP quasi-iso, Kapton HN, PEEK, PTFE, G10/FR4, Z93 white paint, Z306 black
+paint, Silvered Teflon, Aluminized Kapton (VDA), Black Kapton, effective MLI,
+aerogel, and more.
+
+### Engineering views & annotations
+| Tool | Purpose |
+|---|---|
+| `render_views` | Auto-frame orthographic front/top/right/iso views; render to a directory |
+| `add_dimension` | Linear dimension between two world points with offset leader and text label |
+| `label_components` | Callout labels with leader lines for named objects |
+| `add_scale_bar` | World-space scale bar with tick marks |
+
+### Simulation visualization
+| Tool | Purpose |
+|---|---|
+| `bake_scalar_field_to_colors` | Paint per-vertex or per-face scalar values onto a mesh via a chosen colormap (viridis, plasma, inferno, magma, coolwarm, jet) |
+| `add_gradient_legend` | World-space color bar with min/max labels and units |
+| `add_section_view` | Non-destructive boolean half-space clip on a target object |
+
+### Asset libraries (opt-in, require your own API keys)
+| Tool | Purpose |
+|---|---|
 | `get_polyhaven_categories` / `search_polyhaven_assets` / `download_polyhaven_asset` / `set_texture` | Poly Haven HDRIs, textures, models |
 | `search_sketchfab_models` / `get_sketchfab_model_preview` / `download_sketchfab_model` | Sketchfab asset library |
 | `generate_hyper3d_model_via_text` / `_via_images` / `poll_rodin_job_status` / `import_generated_asset` | Hyper3D Rodin text/image-to-3D |
 | `generate_hunyuan3d_model` / `poll_hunyuan_job_status` / `import_generated_asset_hunyuan` | Tencent Hunyuan3D text/image-to-3D |
 | `get_polyhaven_status` / `get_sketchfab_status` / `get_hyper3d_status` / `get_hunyuan3d_status` | Check which integrations are enabled in the addon |
 
-All external-service tools are **opt-in** via toggles in the addon sidebar, and require your own API keys.
-
 ---
 
 ## What you can ask
 
-Because `execute_blender_code` lets the model run arbitrary `bpy` Python in the live session, you can describe geometry and edits in natural language and let Claude translate them. A few categories with representative prompts:
+With the engineering tools above, most CAE-adjacent tasks are one prompt. Claude
+chains the named tools and falls back to `execute_blender_code` when the tool
+set doesn't cover something. Examples by category:
 
-### Modeling from scratch
-- *"Build a 100 × 100 × 20 mm heat-spreader plate with four M3 through-holes on an 80 mm bolt circle, centered at the origin."*
-- *"Extrude a 200 mm L-bracket with a 10 mm fillet on the inner corner and a 4 mm wall thickness."*
-- *"Array this bolt 8 times around the Z axis at 50 mm radius."*
-- *"Create a 6×6 honeycomb lattice inside the current cube using Geometry Nodes."*
+### Building parametric hardware
+- *"Make a 3U CubeSat with 1.5 mm walls, apply Aluminum 6061, then drill an 80 mm PCD bolt pattern with 6 M3 holes on the +Z face."*
+- *"Build a 500 mm diameter pressurized tank with 2:1 ellipsoidal domes, 4 mm Ti-6Al-4V wall, 800 mm barrel."*
+- *"Create a satellite bus 1 × 0.8 × 1.2 m with deployed solar wings, Z93 white paint on the +X face, Silvered Teflon on -X, Aluminized Kapton on the remaining four."*
+- *"Build a 4-wheel rover chassis — 1.2 m wheelbase, 0.9 m track, 0.25 m ground clearance — and drop it on a 100 m Perlin-noise terrain patch."*
+- *"Extrude a 200 mm L-bracket with a 10 mm inner-corner fillet and 3 mm wall."*
+- *"Swept tube along these waypoints: [[0,0,0],[0.5,0,0],[0.5,0.3,0.1]] — 12 mm OD, 1 mm wall."*
 
-### Editing the current scene
-- *"Select the cube, subdivide it twice, then shade smooth."*
-- *"Move the camera so the assembly fills the frame from the front-right iso angle at 30° elevation."*
-- *"Add a sun light from +Z at 5 kW/m² and a fill area light from −X at 500 W."*
-- *"Parent all mesh objects named `Fin_*` to an empty called `FinStack`."*
+### Defeaturing an imported CAD assembly
+- *"Import `./bracket.stl`, separate loose parts, then delete any object whose bounding-box diagonal is below 3 mm. Show me the dry-run list first."*
+- *"Keep only the outer shell of `HeatSink` for radiation analysis, then fill any holes up to 6 sides."*
+- *"Decimate `MainBody` to ratio 0.3, triangulate, and report the final triangle count."*
+- *"Remesh `Enclosure` at 2 mm voxel size so I can export a clean STL for Gmsh."*
 
-### Inspecting & debugging
-- *"Screenshot the viewport and tell me whether the radiator panel is aligned with the coldplate."* — uses `get_viewport_screenshot`
-- *"List every mesh object in the scene with its bounding-box dimensions in mm, sorted by volume."* — uses `get_scene_info` + `get_object_info`
-- *"What materials are assigned to `CoolingFin`, and what's the base colour of each?"*
+### Scene inspection & debugging
+- *"Screenshot the viewport and tell me whether the radiator panel is aligned with the coldplate."*
+- *"List every mesh object with its bounding-box dimensions in mm, sorted by volume."*
+- *"What library material is assigned to `Radiator`, and what ε_IR and α_solar did it get?"*
+
+### Producing report figures
+- *"Render front, top, right, and iso views of `Assembly` to `./figures/` at 1920×1080, transparent background."*
+- *"Add a 100 mm scale bar next to `Plate`, and label `Heat Spreader`, `Fin Stack`, and `Coldplate` with leader lines."*
+- *"Add a dimension between `Bolt1` and `Bolt2` showing the distance in mm."*
+
+### Visualizing simulation results
+- *"Here's a 1-D array of surface temperatures in K [per-face for `Radiator`]: bake them onto the mesh with viridis between 250 and 320 K, then add a gradient legend on the +X side of the scene."*
+- *"Add a section view of `SatBus` through the XZ plane (normal +Y) — keep it as a modifier so I can toggle it."*
 
 ### Pulling in real assets (Poly Haven, Sketchfab)
 - *"Find a brushed-aluminium PBR texture on Poly Haven and apply it to `CoolingFin`."*
 - *"Search Sketchfab for 'cubesat 3U', show me a preview of the top result, and import it at 340 mm length."*
-- *"Load a studio HDRI for the world background at strength 0.6."*
 
 ### AI-generated assets (Hyper3D Rodin / Hunyuan3D)
-- *"Generate a 3D model of 'a wall-mounted condenser unit' with Hyper3D, then scale it to 400 mm and place it against the +Y wall."*
-- *"Turn this photo of a bracket (`C:/tmp/bracket.jpg`) into a 3D mesh via Hunyuan3D and import it."*
+- *"Generate a 3D model of 'a wall-mounted condenser unit' with Hyper3D, scale to 400 mm, place against +Y wall."*
 
-### Rendering for reports
-- *"Render the current scene at 1920×1080 with Cycles, 128 samples, save to `plate_iso.png`."*
-- *"Set up an orthographic camera and render front, top, and right views to `figures/` at 300 DPI equivalent."*
-
-> ⚠️ `execute_blender_code` is powerful — Claude can delete objects, overwrite materials, or run anything the Blender session could. Keep backups of `.blend` files you care about, and review generated code before green-lighting destructive operations.
+> ⚠️ Several tools are **destructive by design** (boolean modifier apply, remesh apply, interior-face deletion). Keep backups of `.blend` files you care about. `delete_small_objects` defaults to `dry_run=True` so you can preview before committing.
 
 ---
 
 ## Engineering-context roadmap
 
-This fork exists because I use Blender alongside FreeCAD and Elmer/OpenFOAM for thermal and mechanical engineering work (spacecraft TVAC, heat pipes, cold plates, PCM design). The upstream addon is great for art and asset pipelines; the roadmap below is where I'd like to take it for CAE use. Contributions welcome.
+This fork exists because I use Blender alongside FreeCAD and Elmer/OpenFOAM for
+thermal and mechanical engineering work (spacecraft TVAC, heat pipes, cold
+plates, PCM design). Most of the engineering tool surface is now shipped (see
+the **Tools** section above). What remains is the I/O and pipeline work.
 
-### 1. Engineering-grade import/export
-- **STEP / IGES bridge** — round-trip through FreeCAD's headless CLI, so Claude can say "open this `.step`, add a 3 mm fillet on the heat-spreader edge, export back."
-- **VTK / XDMF / HDF5 viewer** — load Elmer, OpenFOAM, or CalculiX result meshes as attribute-carrying point clouds or baked vertex-color meshes for publication renders.
-- **Gmsh `.msh` + `.geo`** — import/export so Claude can drive mesh refinement iterations.
+### Outstanding
 
-### 2. Parametric primitives for thermal hardware
-- `make_cold_plate(w, d, h, fin_count, fin_thickness, fin_pitch)` — procedural fin arrays.
-- `make_heat_pipe(d_outer, wall, length, bends=[...])` — swept profile along a path.
-- `make_pcm_enclosure(w, d, h, wall, fill_ratio)` — honeycomb/foam lattice fill via geometry nodes.
-- `make_radiator_panel(area, facesheet_t, core_type, core_t)` — sandwich panels with correct thickness stack.
+1. **VTK / XDMF / HDF5 result viewer** — load Elmer, OpenFOAM, or CalculiX
+   result meshes as attribute-carrying point clouds or baked vertex-color
+   meshes. Today you can pre-extract values into a 1-D array and use
+   `bake_scalar_field_to_colors`; first-class result-file ingestion would
+   remove that step.
+2. **Gmsh `.msh` / `.geo` import/export** — so Claude can drive mesh refinement
+   iterations directly.
+3. **FreeCAD pipeline helpers** — probably *not* built into this fork; the
+   cleaner architecture is for [`freecad-mcp`](https://github.com/lucasgfsvd/freecad-mcp)
+   (companion project) to own CAD I/O (STEP/IGES, feature-aware defeaturing,
+   fillets/chamfers). The model chains the two servers at runtime:
+   *freecad-mcp opens the STEP and exports STL → blender-mcp imports it.*
+4. **Solver drivers** — `elmer_run(case_dir)`, `compare_geometry(stl_before,
+   stl_after, tolerance)` for regression sweeps. Out of scope until after the
+   VTK viewer and a stable solver wrapper are in place.
 
-### 3. Simulation-driven visualization
-- `bake_scalar_field_to_colors(object, values, colormap="viridis", range=[a,b])` — take a 1-D array of per-vertex or per-face scalars (temperatures, stresses, fluxes) and bake it as vertex color or texture with proper scale bar.
-- `add_gradient_legend(min, max, units, colormap)` — auto-place a color-bar in world space for renders.
-- `add_section_view(plane_origin, plane_normal)` — clipping plane with cap shader for cross-section figures.
+### Shipped in this fork
 
-### 4. Standard engineering views & drawings
-- `render_iso_views(object, output_dir)` — auto-frame front/top/side/iso at fixed orthographic scale for report figures.
-- `add_dimension(a, b, offset, units="mm")` — DXF-style linear dimension annotation as world-space text and line.
-- `label_components(mapping)` — auto-callout labels with leader lines (for exploded views).
-
-### 5. FreeCAD / Elmer pipeline helpers
-- `freecad_exec(script_py)` — run a FreeCAD Python script headlessly from Claude, return exported STEP/STL path.
-- `elmer_run(case_dir)` — trigger an Elmer case and return the results path for subsequent visualization.
-- `compare_geometry(stl_before, stl_after, tolerance)` — Hausdorff-style diff for regression checks on parametric sweeps.
-
-### 6. Material library with physics metadata
-- Ship a small JSON library (Al 6061, Cu C101, Ti 6Al-4V, kapton, FR4…) mapped to Blender materials + carrying `{k, cp, rho, epsilon_IR, alpha_solar}` as custom properties. Lets simulation tools read them straight from the `.blend`.
+- **Parametric primitives** — mechanical (slotted/perforated plates, brackets,
+  channels, rounded boxes, bolt-hole patterns, swept tubes, truss nodes) and
+  aerospace (cylindrical/spherical tanks, cones, tori, satellite buses,
+  CubeSats, rover chassis, lander legs, terrain patches).
+- **Mesh simplification / defeaturing** — decimate, planar decimate, interior
+  face removal, small-object filtering, loose-part separation, hole fill, weld,
+  triangulate, voxel/quad remesh.
+- **Material library** — 22 aerospace materials with thermal/optical/structural
+  metadata, applied as Blender custom properties for downstream simulation
+  export.
+- **Engineering views & annotations** — auto-framed orthographic renders,
+  linear dimensions, component labels with leader lines, scale bars.
+- **Simulation visualization** — scalar-field color baking (6 colormaps),
+  world-space gradient legend, non-destructive section-view clipping.
 
 ---
 

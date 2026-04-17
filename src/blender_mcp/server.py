@@ -1149,6 +1149,56 @@ def asset_creation_strategy() -> str:
     - The task specifically requires a basic material/color
     """
 
+RESULT_SENTINEL = "__BLENDER_MCP_RESULT__"
+
+
+def _run_in_blender(code: str) -> Dict[str, Any]:
+    """
+    Execute Python in Blender via the addon's execute_code handler and
+    return a structured result.
+
+    Convention: the generated code should call _emit(payload) — defined in
+    the snippet header — to return a JSON-serializable payload. Helper
+    snippets prefix each emission with RESULT_SENTINEL so we can ignore
+    incidental stdout from bpy operators.
+    """
+    blender = get_blender_connection()
+    response = blender.send_command("execute_code", {"code": code})
+    raw = (response.get("result") or "").strip()
+    if not raw:
+        return {}
+    for line in reversed(raw.splitlines()):
+        if line.startswith(RESULT_SENTINEL):
+            try:
+                return json.loads(line[len(RESULT_SENTINEL):])
+            except json.JSONDecodeError:
+                break
+    return {"_stdout": raw}
+
+
+def _snippet_header() -> str:
+    """Header injected at the top of every generated snippet — defines _emit()."""
+    return (
+        "import bpy, json\n"
+        f"def _emit(p): print({RESULT_SENTINEL!r} + json.dumps(p))\n"
+    )
+
+
+# Register tool modules. Imported here, after mcp and helpers exist, to
+# avoid circular imports inside the tool modules.
+from blender_mcp.tools import simplify as _tools_simplify  # noqa: E402
+from blender_mcp.tools import materials as _tools_materials  # noqa: E402
+from blender_mcp.tools import primitives as _tools_primitives  # noqa: E402
+from blender_mcp.tools import views as _tools_views  # noqa: E402
+from blender_mcp.tools import simviz as _tools_simviz  # noqa: E402
+
+_tools_simplify.register(mcp)
+_tools_materials.register(mcp)
+_tools_primitives.register(mcp)
+_tools_views.register(mcp)
+_tools_simviz.register(mcp)
+
+
 # Main execution
 
 def main():
