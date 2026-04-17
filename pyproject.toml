@@ -1,11 +1,12 @@
 [project]
 name = "blender-mcp"
 version = "1.5.5+fork.1"
-description = "Blender integration through the Model Context Protocol (telemetry-free fork)"
+description = "Blender integration through the Model Context Protocol (TESSA LABS engineering fork)"
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
-    {name = "lucasgfsvd"}
+    {name = "TESSA LABS"},
+    {name = "Lucas Salvador"}
 ]
 license = {text = "MIT"}
 classifiers = [
@@ -31,6 +32,6 @@ package-dir = {"" = "src"}
 blender_mcp = ["data/*.json"]
 
 [project.urls]
-"Homepage" = "https://github.com/lucasgfsvd/blender-mcp"
-"Bug Tracker" = "https://github.com/lucasgfsvd/blender-mcp/issues"
+"Homepage" = "https://github.com/tessalabs-space/blender-mcp"
+"Bug Tracker" = "https://github.com/tessalabs-space/blender-mcp/issues"
 "Upstream" = "https://github.com/ahujasid/blender-mcp"

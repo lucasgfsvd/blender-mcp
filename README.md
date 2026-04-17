@@ -1,8 +1,8 @@
-# Blender MCP — Telemetry-Free Fork
+# Blender MCP — TESSA LABS engineering fork
 
-Control Blender from Claude Desktop (or any MCP client) over a local socket. This is a fork of [ahujasid/blender-mcp](https://github.com/ahujasid/blender-mcp) with **all telemetry and third-party analytics removed**.
+Control Blender from Claude Desktop (or any MCP client) over a local socket. This is the [**TESSA LABS**](https://github.com/tessalabs-space) fork of [ahujasid/blender-mcp](https://github.com/ahujasid/blender-mcp), with **all telemetry and third-party analytics removed** and ~40 additional MCP tools aimed at CAE / spacecraft-engineering workflows (material library, parametric primitives, mesh defeaturing, engineering views, simulation-result visualization).
 
-> **Attribution.** All original Blender-integration code is the work of **Siddharth Ahuja** ([@sidahuj](https://x.com/sidahuj)), released under MIT. This fork keeps the original `LICENSE` and only modifies the telemetry stack, packaging, and docs. If you find this useful, consider [sponsoring the original author](https://github.com/sponsors/ahujasid).
+> **Attribution.** All original Blender-integration code is the work of **Siddharth Ahuja** ([@sidahuj](https://x.com/sidahuj)), released under MIT. This fork keeps the original `LICENSE`, adds a second copyright line for TESSA LABS / Lucas Salvador covering the fork modifications, and is still MIT. If you find the upstream integration useful, consider [sponsoring the original author](https://github.com/sponsors/ahujasid).
 
 ---
 
@@ -47,7 +47,7 @@ Grab [`addon.py`](addon.py) from this repo (GitHub → *Raw* → save), then in 
 Pre-install as a persistent `uv` tool (recommended — no `git` required at client startup):
 
 ```bash
-uv tool install git+https://github.com/lucasgfsvd/blender-mcp
+uv tool install git+https://github.com/tessalabs-space/blender-mcp
 ```
 
 This places `blender-mcp.exe` (or `blender-mcp` on \*nix) under your `uv` tool bin. Upgrade later with `uv tool upgrade blender-mcp`.
@@ -77,7 +77,7 @@ On macOS/Linux the command is typically `~/.local/bin/blender-mcp`.
   "mcpServers": {
     "blender": {
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/lucasgfsvd/blender-mcp", "blender-mcp"]
+      "args": ["--from", "git+https://github.com/tessalabs-space/blender-mcp", "blender-mcp"]
     }
   }
 }
@@ -280,4 +280,4 @@ The MCP server will start and then log `Failed to connect to Blender: [WinError 
 
 ## License
 
-MIT — see `LICENSE`. Original copyright © Siddharth Ahuja; fork modifications © lucasgfsvd. Both are permissively licensed; keep this `LICENSE` file in any redistribution.
+MIT — see `LICENSE`. Original copyright © Siddharth Ahuja; fork modifications © TESSA LABS and Lucas Salvador. Both are permissively licensed; keep this `LICENSE` file in any redistribution.
