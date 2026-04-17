@@ -37,31 +37,54 @@ Claude Desktop  <-- stdio -->  blender-mcp server  <-- TCP:9876 -->  Blender add
 - [`uv`](https://astral.sh/uv/) installed and on PATH
 
 ### 1. Install the addon in Blender
-Clone this repo, then:
-- *Edit → Preferences → Add-ons → Install...* → select `addon.py`
+Grab [`addon.py`](addon.py) from this repo (GitHub → *Raw* → save), then in Blender:
+- *Edit → Preferences → Add-ons → Install...* → select the saved `addon.py`
 - Enable the checkbox next to "Interface: Blender MCP"
 - In the 3D Viewport press **N** → **BlenderMCP** tab → **Connect to MCP server**
 
-### 2. Point your MCP client at this fork
+### 2. Install the MCP server
 
-**Claude Desktop** (`claude_desktop_config.json`):
+Pre-install as a persistent `uv` tool (recommended — no `git` required at client startup):
+
+```bash
+uv tool install git+https://github.com/lucasgfsvd/blender-mcp
+```
+
+This places `blender-mcp.exe` (or `blender-mcp` on \*nix) under your `uv` tool bin. Upgrade later with `uv tool upgrade blender-mcp`.
+
+### 3. Point your MCP client at it
+
+**Claude Desktop** (`claude_desktop_config.json`) — direct exe, no git needed at spawn:
 
 ```json
 {
   "mcpServers": {
     "blender": {
-      "command": "C:\\Users\\YOU\\.local\\bin\\uvx.exe",
-      "args": [
-        "--from",
-        "git+https://github.com/lucasgfsvd/blender-mcp",
-        "blender-mcp"
-      ]
+      "command": "C:\\Users\\YOU\\.local\\bin\\blender-mcp.exe",
+      "args": []
     }
   }
 }
 ```
 
-On macOS/Linux replace `command` with `uvx` and adjust path.
+On macOS/Linux the command is typically `~/.local/bin/blender-mcp`.
+
+<details>
+<summary>Alternative: on-demand via <code>uvx</code> (requires <code>git</code> on PATH)</summary>
+
+```json
+{
+  "mcpServers": {
+    "blender": {
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/lucasgfsvd/blender-mcp", "blender-mcp"]
+    }
+  }
+}
+```
+
+Heads-up: on Windows, MCP subprocesses don't always inherit `git.exe` on PATH and this form will fail with `Git executable not found`. Prefer the pre-installed form above.
+</details>
 
 Restart the client. The server will launch on demand, connect to Blender on `localhost:9876`, and expose the full tool surface.
 
@@ -74,13 +97,52 @@ Restart the client. The server will launch on demand, connect to Blender on `loc
 | `get_scene_info` | Inspect current scene (objects, camera, lights) |
 | `get_object_info` | Inspect a single object (transform, mesh, materials) |
 | `get_viewport_screenshot` | Capture the 3D viewport as an image |
-| `execute_blender_code` | Run arbitrary `bpy` Python inside Blender |
-| `get_polyhaven_*` / `download_polyhaven_asset` | Poly Haven HDRIs/textures/models |
-| `search_sketchfab_models` / `download_sketchfab_model` | Sketchfab asset library |
-| `generate_hyper3d_model_via_text` / `_via_images` | Hyper3D Rodin text/image-to-3D |
-| `poll_rodin_job_status` / `import_generated_asset` | Retrieve generated assets |
+| `execute_blender_code` | Run arbitrary `bpy` Python inside Blender — the workhorse for modeling/editing |
+| `get_polyhaven_categories` / `search_polyhaven_assets` / `download_polyhaven_asset` / `set_texture` | Poly Haven HDRIs, textures, models |
+| `search_sketchfab_models` / `get_sketchfab_model_preview` / `download_sketchfab_model` | Sketchfab asset library |
+| `generate_hyper3d_model_via_text` / `_via_images` / `poll_rodin_job_status` / `import_generated_asset` | Hyper3D Rodin text/image-to-3D |
+| `generate_hunyuan3d_model` / `poll_hunyuan_job_status` / `import_generated_asset_hunyuan` | Tencent Hunyuan3D text/image-to-3D |
+| `get_polyhaven_status` / `get_sketchfab_status` / `get_hyper3d_status` / `get_hunyuan3d_status` | Check which integrations are enabled in the addon |
 
 All external-service tools are **opt-in** via toggles in the addon sidebar, and require your own API keys.
+
+---
+
+## What you can ask
+
+Because `execute_blender_code` lets the model run arbitrary `bpy` Python in the live session, you can describe geometry and edits in natural language and let Claude translate them. A few categories with representative prompts:
+
+### Modeling from scratch
+- *"Build a 100 × 100 × 20 mm heat-spreader plate with four M3 through-holes on an 80 mm bolt circle, centered at the origin."*
+- *"Extrude a 200 mm L-bracket with a 10 mm fillet on the inner corner and a 4 mm wall thickness."*
+- *"Array this bolt 8 times around the Z axis at 50 mm radius."*
+- *"Create a 6×6 honeycomb lattice inside the current cube using Geometry Nodes."*
+
+### Editing the current scene
+- *"Select the cube, subdivide it twice, then shade smooth."*
+- *"Move the camera so the assembly fills the frame from the front-right iso angle at 30° elevation."*
+- *"Add a sun light from +Z at 5 kW/m² and a fill area light from −X at 500 W."*
+- *"Parent all mesh objects named `Fin_*` to an empty called `FinStack`."*
+
+### Inspecting & debugging
+- *"Screenshot the viewport and tell me whether the radiator panel is aligned with the coldplate."* — uses `get_viewport_screenshot`
+- *"List every mesh object in the scene with its bounding-box dimensions in mm, sorted by volume."* — uses `get_scene_info` + `get_object_info`
+- *"What materials are assigned to `CoolingFin`, and what's the base colour of each?"*
+
+### Pulling in real assets (Poly Haven, Sketchfab)
+- *"Find a brushed-aluminium PBR texture on Poly Haven and apply it to `CoolingFin`."*
+- *"Search Sketchfab for 'cubesat 3U', show me a preview of the top result, and import it at 340 mm length."*
+- *"Load a studio HDRI for the world background at strength 0.6."*
+
+### AI-generated assets (Hyper3D Rodin / Hunyuan3D)
+- *"Generate a 3D model of 'a wall-mounted condenser unit' with Hyper3D, then scale it to 400 mm and place it against the +Y wall."*
+- *"Turn this photo of a bracket (`C:/tmp/bracket.jpg`) into a 3D mesh via Hunyuan3D and import it."*
+
+### Rendering for reports
+- *"Render the current scene at 1920×1080 with Cycles, 128 samples, save to `plate_iso.png`."*
+- *"Set up an orthographic camera and render front, top, and right views to `figures/` at 300 DPI equivalent."*
+
+> ⚠️ `execute_blender_code` is powerful — Claude can delete objects, overwrite materials, or run anything the Blender session could. Keep backups of `.blend` files you care about, and review generated code before green-lighting destructive operations.
 
 ---
 
