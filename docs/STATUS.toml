@@ -1,0 +1,27 @@
+# What this repo is, where it stands, and what it needs next.
+#
+# Read by My-Dashboard's repo-radar job (tasks/repo-radar) to build the /repos
+# overview across every repo. Nothing parses this repo's code -- this file is the
+# whole contract, so keep it true. `updated` is load-bearing: the radar counts the
+# commits landed since that date and flags the file as stale rather than showing
+# an obsolete description.
+#
+# Seeded from this repo's own documentation (README.md).
+
+
+schema = 1
+
+purpose = "The user's TESSA Labs engineering fork of ahujasid/blender-mcp - it strips all telemetry and analytics from the upstream MCP server and adds ~40 CAE-oriented tools (aerospace parametric primitives, mesh defeaturing, a 22-material engineering library, engineering views and simulation-result colour baking) for driving Blender from Claude in spacecraft thermal/mechanical work."
+
+# idea | prototype | active | maintenance | paused | archived
+stage = "maintenance"
+
+# The date this file was last made true.
+updated = 2026-09-24
+
+# The real next moves, most important first - taken from this repo's docs.
+next_actions = [
+  "Add a VTK / XDMF / HDF5 result viewer so Elmer, OpenFOAM and CalculiX result meshes load as attribute-carrying point clouds or baked vertex-colour meshes, removing today's pre-extract-to-1D-array step before `bake_scalar_field_to_colors`.",
+  "Add Gmsh `.msh` / `.geo` import and export so mesh-refinement iterations can be driven from the model.",
+  "Add solver drivers - `elmer_run(case_dir)` and `compare_geometry(stl_before, stl_after, tolerance)` for regression sweeps - explicitly after the VTK viewer and a stable solver wrapper exist.",
+]
